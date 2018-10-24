@@ -200,6 +200,81 @@
                 android:layout_height="2dp"
                 android:background="@color/delimiter"/>
 
+            <!-- LEGAL SECTION -->
+            <android.support.v7.widget.AppCompatTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/law_section_header"
+                android:textColor="@color/colorHeader"
+                android:layout_marginTop="@dimen/reg_new_section_margin"
+                />
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/button_show_contract"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/reg_law_contract"
+                android:textSize="@dimen/reg_main_text_size"
+                android:paddingTop="@dimen/textviews_padding"
+                android:paddingBottom="@dimen/textviews_padding"
+                android:drawableEnd="@drawable/small_narrow"
+                android:drawableRight="@drawable/small_narrow"
+                android:layout_marginEnd="@dimen/icon_photo_padding"
+                android:layout_marginRight="@dimen/icon_photo_padding"
+                />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="@color/delimiter"/>
+            <android.support.v7.widget.SwitchCompat
+                android:id="@+id/switch_agree_contract"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/reg_law_contract_agree"
+                android:textSize="@dimen/reg_main_text_size"
+                android:paddingTop="@dimen/textviews_padding"
+                android:paddingBottom="@dimen/textviews_padding"/>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="@color/delimiter"/>
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/button_show_pers_agreement"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/reg_law_pers"
+                android:textSize="@dimen/reg_main_text_size"
+                android:paddingTop="@dimen/textviews_padding"
+                android:paddingBottom="@dimen/textviews_padding"
+                android:drawableEnd="@drawable/small_narrow"
+                android:drawableRight="@drawable/small_narrow"
+                android:layout_marginEnd="@dimen/icon_photo_padding"
+                android:layout_marginRight="@dimen/icon_photo_padding"
+                />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="@color/delimiter"/>
+            <android.support.v7.widget.SwitchCompat
+                android:id="@+id/switch_agree_pers"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/reg_law_pers_agree"
+                android:textSize="@dimen/reg_main_text_size"
+                android:paddingTop="@dimen/textviews_padding"
+                android:paddingBottom="@dimen/textviews_padding"/>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="@color/delimiter"/>
+            <android.support.v7.widget.AppCompatButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/reg_next"
+                android:layout_marginTop="@dimen/textviews_padding"
+                android:layout_marginBottom="@dimen/textviews_padding"
+                android:background="@drawable/button_background"
+                android:textColor="#fff"
+                />
         </LinearLayout>
     </ScrollView>
 

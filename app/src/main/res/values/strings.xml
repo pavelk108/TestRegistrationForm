@@ -25,7 +25,7 @@
 
     <string name="law_section_header">ЮРИДИЧЕСКАЯ ИНФОРМАЦИЯ</string>
     <string name="reg_law_contract">Договор присоединения</string>
-    <string name="reg_law_contract_agree">Ознокомлен с договором</string>
+    <string name="reg_law_contract_agree">Ознакомлен с договором</string>
     <string name="reg_law_pers">Персональные данные</string>
     <string name="reg_law_pers_agree">Согласен на обработку данных</string>
 
