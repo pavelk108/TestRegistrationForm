@@ -9,5 +9,25 @@
     <string name="reg_birthday">Дата рождения</string>
     <string name="reg_email">Элетронная почта</string>
 
+    <string name="passport_section_header">ПАСПОРТ</string>
+    <string name="reg_passport_num">Серия и номер</string>
+    <string name="reg_passport_who">Кем выдан</string>
+    <string name="reg_passport_date">Дата выдачи</string>
+    <string name="reg_passport_photo_selfie">Селфи с паспортом</string>
+    <string name="reg_passport_photo_first">Первый разворот паспорта</string>
+    <string name="reg_passport_photo_second">Разворот с регистрацией</string>
 
+    <string name="driverlicense_section_header">ВОДИТЕЛЬСКОЕ УДОСТОВЕРЕНИЕ</string>
+    <string name="reg_driverlicense_num">Серия и номер</string>
+    <string name="reg_driverlicense_date">Дата выдачи</string>
+    <string name="reg_driverlicense_photo_first">Лицевая сторона ВУ</string>
+    <string name="reg_driverlicense_photo_second">Оборотная сторона ВУ</string>
+
+    <string name="law_section_header">ЮРИДИЧЕСКАЯ ИНФОРМАЦИЯ</string>
+    <string name="reg_law_contract">Договор присоединения</string>
+    <string name="reg_law_contract_agree">Ознокомлен с договором</string>
+    <string name="reg_law_pers">Персональные данные</string>
+    <string name="reg_law_pers_agree">Согласен на обработку данных</string>
+
+    <string name="reg_next">ДАЛЕЕ</string>
 </resources>
