@@ -17,7 +17,7 @@
             android:layout_marginRight="@dimen/reg_main_margin"
 
             >
-
+            <!-- PERSONAL DATA -->
             <android.support.v7.widget.AppCompatTextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -61,7 +61,7 @@
                 android:textSize="@dimen/reg_main_text_size"
                 />
 
-
+            <!-- PASSPORT -->
             <android.support.v7.widget.AppCompatTextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -129,6 +129,64 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/reg_passport_photo_second"
+                android:textSize="@dimen/reg_main_text_size"
+                android:paddingTop="@dimen/textviews_padding"
+                android:paddingBottom="@dimen/textviews_padding"
+                android:drawableEnd="@drawable/ic_photo"
+                android:drawableRight="@drawable/ic_photo"
+                android:layout_marginEnd="@dimen/icon_photo_padding"
+                android:layout_marginRight="@dimen/icon_photo_padding"
+                />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="@color/delimiter"/>
+
+
+            <!-- DRIVER LICENSE -->
+            <android.support.v7.widget.AppCompatTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/driverlicense_section_header"
+                android:textColor="@color/colorHeader"
+                android:layout_marginTop="@dimen/reg_new_section_margin"
+                />
+            <android.support.v7.widget.AppCompatEditText
+                android:id="@+id/text_driverlicense_num"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/reg_driverlicense_num"
+                android:textSize="@dimen/reg_main_text_size"
+                />
+            <android.support.v7.widget.AppCompatEditText
+                android:id="@+id/text_driverlicense_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/reg_driverlicense_date"
+                android:textSize="@dimen/reg_main_text_size"
+                />
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/button_driverlicense_photo1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/reg_driverlicense_photo_first"
+                android:textSize="@dimen/reg_main_text_size"
+                android:paddingTop="@dimen/textviews_padding"
+                android:paddingBottom="@dimen/textviews_padding"
+                android:drawableEnd="@drawable/ic_photo"
+                android:drawableRight="@drawable/ic_photo"
+                android:layout_marginEnd="@dimen/icon_photo_padding"
+                android:layout_marginRight="@dimen/icon_photo_padding"
+                />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="@color/delimiter"/>
+            <android.support.v7.widget.AppCompatTextView
+                android:id="@+id/button_driverlicense_photo2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/reg_driverlicense_photo_second"
                 android:textSize="@dimen/reg_main_text_size"
                 android:paddingTop="@dimen/textviews_padding"
                 android:paddingBottom="@dimen/textviews_padding"
