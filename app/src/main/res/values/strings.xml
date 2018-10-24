@@ -1,4 +1,13 @@
 <resources>
     <string name="app_name">TestRegistrationForm</string>
     <string name="reg_title">Регистрация</string>
+
+    <string name="personal_data_section_header">ЛИЧНЫЕ ДАННЫЕ</string>
+    <string name="reg_name">Имя</string>
+    <string name="reg_surname">Фамилия</string>
+    <string name="reg_exname">Отчество</string>
+    <string name="reg_birthday">Дата рождения</string>
+    <string name="reg_email">Элетронная почта</string>
+
+
 </resources>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="reg_main_margin">15sp</dimen>
+    <dimen name="reg_new_section_margin">15sp</dimen>
+    <dimen name="reg_main_padding">5sp</dimen>
+
+</resources>
