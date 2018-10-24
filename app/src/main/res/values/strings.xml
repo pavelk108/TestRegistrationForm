@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">TestRegistrationForm</string>
+    <string name="reg_title">Регистрация</string>
 </resources>
