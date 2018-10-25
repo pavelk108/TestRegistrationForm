@@ -30,4 +30,8 @@
     <string name="reg_law_pers_agree">Согласен на обработку данных</string>
 
     <string name="reg_next">ДАЛЕЕ</string>
+
+    <string name="сontract_activity_title">Договор</string>
+    <string name="pers_activity_title">Соглашение</string>
+
 </resources>

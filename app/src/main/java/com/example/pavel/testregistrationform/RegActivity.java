@@ -1,7 +1,7 @@
 package com.example.pavel.testregistrationform;
 
+import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.ColorFilter;
 import android.graphics.PorterDuff;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -252,7 +252,36 @@ public class RegActivity extends AppCompatActivity implements View.OnClickListen
                     Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_LONG).show();
                     // successful registration
                 } else break;
-
+            case R.id.button_show_contract:
+                {
+                    Intent intent = new Intent(getApplicationContext(), WebViewActivity.class);
+                    intent.putExtra(
+                            WebViewActivity.extraTitle,
+                            getResources().getString(R.string.сontract_activity_title)
+                    );
+                    intent.putExtra(
+                            WebViewActivity.extraURL,
+                            "https://ya.ru"
+                            //"https://drive.google.com/viewerng/viewer?embedded=true&url=https://lifcar.ru/lifcar_agreement.pdf"
+                    );
+                    startActivity(intent);
+                }
+                break;
+            case R.id.button_show_pers_agreement:
+                {
+                    Intent intent = new Intent(getApplicationContext(), WebViewActivity.class);
+                    intent.putExtra(
+                            WebViewActivity.extraTitle,
+                            getResources().getString(R.string.pers_activity_title)
+                    );
+                    intent.putExtra(
+                            WebViewActivity.extraURL,
+                            "https://ya.ru"
+                            //"https://drive.google.com/viewerng/viewer?embedded=true&url=https://lifcar.ru/lifcar_agreement.pdf"
+                    );
+                    startActivity(intent);
+                }
+                break;
             default: break;
         }
 
