@@ -28,8 +28,11 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -42,6 +45,24 @@ import ru.tinkoff.decoro.watchers.MaskFormatWatcher;
 public class RegActivity extends AppCompatActivity implements View.OnClickListener, View.OnFocusChangeListener {
     public static final Pattern VALID_EMAIL_ADDRESS_REGEX =
             Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
+    public static final String PHOTO_SELFIE_FILE_NAME = "photoSelfie.jpg";
+    public static final String PHOTO_PAS1_FILE_NAME = "photoPas1.jpg";
+    public static final String PHOTO_PAS2_FILE_NAME = "photoPas2.jpg";
+    public static final String PHOTO_DL1_FILE_NAME = "photoDL1.jpg";
+    public static final String PHOTO_DL2_FILE_NAME = "photoDL2.jpg";
+
+    // can't use raw ID as requestCode
+    //  because requestCode must be < 65536
+    private static final int[] requestCode_to_ID = new int[] {
+      R.id.button_passport_selfie,      // 0
+      R.id.button_passport_photo1,      // 1
+      R.id.button_passport_photo2,      // 2
+      R.id.button_driverlicense_photo1, // 3
+      R.id.button_driverlicense_photo2  // 4
+    };
+    static {
+        Arrays.sort(requestCode_to_ID);
+    }
 
     private AppCompatEditText textName;
     private AppCompatEditText textSurame;
@@ -276,8 +297,8 @@ public class RegActivity extends AppCompatActivity implements View.OnClickListen
                     );
                     intent.putExtra(
                             WebViewActivity.extraURL,
-                            "https://ya.ru"
-                            //"https://drive.google.com/viewerng/viewer?embedded=true&url=https://lifcar.ru/lifcar_agreement.pdf"
+                            //"https://lifcar.ru/"
+                            "https://drive.google.com/viewerng/viewer?embedded=true&url=https://lifcar.ru/lifcar_agreement.pdf"
                     );
                     startActivity(intent);
                 }
@@ -291,20 +312,26 @@ public class RegActivity extends AppCompatActivity implements View.OnClickListen
                     );
                     intent.putExtra(
                             WebViewActivity.extraURL,
-                            "https://ya.ru"
-                            //"https://drive.google.com/viewerng/viewer?embedded=true&url=https://lifcar.ru/lifcar_agreement.pdf"
+                            //"https://ya.ru"
+                            "https://drive.google.com/viewerng/viewer?embedded=true&url=https://lifcar.ru/lifcar_agreement.pdf"
                     );
                     startActivity(intent);
                 }
                 break;
-            case R.id.button_passport_selfie: {
+            case R.id.button_passport_selfie:
+            case R.id.button_passport_photo1:
+            case R.id.button_passport_photo2:
+            case R.id.button_driverlicense_photo1:
+            case R.id.button_driverlicense_photo2:
+                {
                 Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
                 try {
-                    //photoSelfie = File.createTempFile("photoSelfie", ".jpg", storageDir);
-                    photoSelfie = new File(storageDir, "photo_selfie.jpg");
+                    // create file for save photo
+                    // filename defined by button ID
+                    photoSelfie = new File(storageDir, getPhotoFileName(view.getId()));
                     photoSelfie.createNewFile();
-                } catch (Exception e) {
+                } catch (IOException e) {
                     e.printStackTrace();
                     break;
                 }
@@ -313,7 +340,10 @@ public class RegActivity extends AppCompatActivity implements View.OnClickListen
                         photoSelfie);
 
                 intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                this.startActivityForResult(intent, 1);
+
+                //get requestCode
+                int rCode = Arrays.binarySearch(requestCode_to_ID, view.getId());
+                this.startActivityForResult(intent, rCode);
             }
                 break;
             default: break;
@@ -323,18 +353,22 @@ public class RegActivity extends AppCompatActivity implements View.OnClickListen
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode) {
-            case 1:
-                int size = spToPx(20, this);
-                Bitmap b = BitmapFactory.decodeFile(photoSelfie.getAbsolutePath());
-                Bitmap resizedBitmap = Bitmap.createScaledBitmap(
-                    b, size, size, false);
-                b.recycle();
-                Drawable drawable = new BitmapDrawable(getResources(), resizedBitmap);
-                butPassportSelfie.setCompoundDrawablesWithIntrinsicBounds(null, null, drawable, null);
-                break;
-            default: break;
-        }
+
+        // get ID of pressed button by requestCode
+        int butID = requestCode_to_ID[requestCode];
+
+        // get and resize photo
+        int size = spToPx(20, this);
+        Bitmap b = BitmapFactory.decodeFile(photoSelfie.getAbsolutePath());
+        Bitmap resizedBitmap = Bitmap.createScaledBitmap(
+            b, size, size, false);
+        b.recycle();
+
+        // show small photo
+        Drawable drawable = new BitmapDrawable(getResources(), resizedBitmap);
+        ((AppCompatTextView)findViewById(butID))
+                .setCompoundDrawablesWithIntrinsicBounds(null, null, drawable, null);
+
     }
 
     @Override
@@ -344,5 +378,16 @@ public class RegActivity extends AppCompatActivity implements View.OnClickListen
 
     public static int spToPx(float sp, Context context) {
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, context.getResources().getDisplayMetrics());
+    }
+    public static String getPhotoFileName(int resId) {
+        switch (resId) {
+            case R.id.button_passport_selfie: return PHOTO_SELFIE_FILE_NAME;
+            case R.id.button_passport_photo1: return PHOTO_PAS1_FILE_NAME;
+            case R.id.button_passport_photo2: return PHOTO_PAS2_FILE_NAME;
+            case R.id.button_driverlicense_photo1: return PHOTO_DL1_FILE_NAME;
+            case R.id.button_driverlicense_photo2: return PHOTO_DL2_FILE_NAME;
+
+            default: return null;
+        }
     }
 }
