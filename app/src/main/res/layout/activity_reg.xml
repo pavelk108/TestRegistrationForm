@@ -267,6 +267,7 @@
                 android:layout_height="2dp"
                 android:background="@color/delimiter"/>
             <android.support.v7.widget.AppCompatButton
+                android:id="@+id/but_next"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/reg_next"
