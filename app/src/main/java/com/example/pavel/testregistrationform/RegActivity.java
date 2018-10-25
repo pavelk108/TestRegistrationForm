@@ -1,8 +1,18 @@
 package com.example.pavel.testregistrationform;
 
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.support.annotation.Nullable;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -10,9 +20,12 @@ import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.AppCompatEditText;
 import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.SwitchCompat;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -60,6 +73,8 @@ public class RegActivity extends AppCompatActivity implements View.OnClickListen
     private Date dateBirth;
     private Date datePassport;
     private Date dateDriverLicense;
+
+    private File photoSelfie;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -282,13 +297,52 @@ public class RegActivity extends AppCompatActivity implements View.OnClickListen
                     startActivity(intent);
                 }
                 break;
+            case R.id.button_passport_selfie: {
+                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+                try {
+                    //photoSelfie = File.createTempFile("photoSelfie", ".jpg", storageDir);
+                    photoSelfie = new File(storageDir, "photo_selfie.jpg");
+                    photoSelfie.createNewFile();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    break;
+                }
+                Uri photoURI = FileProvider.getUriForFile(this,
+                        "com.example.pavel.testregistrationform.fileprovider",
+                        photoSelfie);
+
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                this.startActivityForResult(intent, 1);
+            }
+                break;
             default: break;
         }
+    }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case 1:
+                int size = spToPx(20, this);
+                Bitmap b = BitmapFactory.decodeFile(photoSelfie.getAbsolutePath());
+                Bitmap resizedBitmap = Bitmap.createScaledBitmap(
+                    b, size, size, false);
+                b.recycle();
+                Drawable drawable = new BitmapDrawable(getResources(), resizedBitmap);
+                butPassportSelfie.setCompoundDrawablesWithIntrinsicBounds(null, null, drawable, null);
+                break;
+            default: break;
+        }
     }
 
     @Override
     public void onFocusChange(View view, boolean b) {
         view.getBackground().clearColorFilter();
+    }
+
+    public static int spToPx(float sp, Context context) {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, context.getResources().getDisplayMetrics());
     }
 }
