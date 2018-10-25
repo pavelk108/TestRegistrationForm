@@ -36,6 +36,8 @@ public class WebViewActivity extends AppCompatActivity {
 
         mWebView = findViewById(R.id.web_view);
         mWebView.loadUrl(intent.getStringExtra(extraURL));
+
+        mWebView.getSettings().setJavaScriptEnabled(true);
     }
 
     // for back button in action bar
