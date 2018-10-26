@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.AppCompatTextView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/button_driverlicense_photo2"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:textSize="@dimen/reg_main_text_size"
+    android:paddingTop="@dimen/textviews_padding"
+    android:paddingBottom="@dimen/textviews_padding"
+    android:drawableEnd="@drawable/small_narrow"
+    android:drawableRight="@drawable/small_narrow"
+    android:paddingEnd="@dimen/icon_photo_padding"
+    android:paddingRight="@dimen/icon_photo_padding"
+    />

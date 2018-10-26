@@ -5,5 +5,5 @@
     <dimen name="reg_main_padding">5sp</dimen>
     <dimen name="reg_main_text_size">18sp</dimen>
     <dimen name="textviews_padding">10sp</dimen>
-    <dimen name="icon_photo_padding">10sp</dimen>
+    <dimen name="icon_photo_padding">20sp</dimen>
 </resources>

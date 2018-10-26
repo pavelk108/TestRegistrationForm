@@ -2,6 +2,7 @@ package com.example.pavel.testregistrationform;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -16,33 +17,39 @@ import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.AppCompatEditText;
-import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.SwitchCompat;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.BaseAdapter;
+import android.widget.CompoundButton;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import ru.tinkoff.decoro.MaskImpl;
 import ru.tinkoff.decoro.parser.UnderscoreDigitSlotsParser;
-import ru.tinkoff.decoro.slots.PredefinedSlots;
 import ru.tinkoff.decoro.slots.Slot;
 import ru.tinkoff.decoro.watchers.MaskFormatWatcher;
 
-public class RegActivity extends AppCompatActivity implements View.OnClickListener, View.OnFocusChangeListener {
+public class RegActivity extends AppCompatActivity implements ListView.OnItemClickListener {
     public static final Pattern VALID_EMAIL_ADDRESS_REGEX =
             Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
     public static final String PHOTO_SELFIE_FILE_NAME = "photoSelfie.jpg";
@@ -51,57 +58,161 @@ public class RegActivity extends AppCompatActivity implements View.OnClickListen
     public static final String PHOTO_DL1_FILE_NAME = "photoDL1.jpg";
     public static final String PHOTO_DL2_FILE_NAME = "photoDL2.jpg";
 
-    // can't use raw ID as requestCode
-    //  because requestCode must be < 65536
-    private static final int[] requestCode_to_ID = new int[] {
-      R.id.button_passport_selfie,      // 0
-      R.id.button_passport_photo1,      // 1
-      R.id.button_passport_photo2,      // 2
-      R.id.button_driverlicense_photo1, // 3
-      R.id.button_driverlicense_photo2  // 4
-    };
-    static {
-        Arrays.sort(requestCode_to_ID);
-    }
-
-    private AppCompatEditText textName;
-    private AppCompatEditText textSurame;
-    private AppCompatEditText textExname;
-    private AppCompatEditText textBirthDate;
-    private AppCompatEditText textEMail;
-
-
-    private AppCompatEditText textPassportNum;
-    private AppCompatEditText textPassportWho;
-    private AppCompatEditText textPassportDate;
-    private AppCompatTextView butPassportSelfie;
-    private AppCompatTextView butPassportPhoto1;
-    private AppCompatTextView butPassportPhoto2;
-
-    private AppCompatEditText textDriverLicenseNum;
-    private AppCompatEditText textDriverLicenseDate;
-    private AppCompatTextView butDriverLicensePhoto1;
-    private AppCompatTextView butDriverLicensePhoto2;
-
-    private AppCompatTextView butShowContact;
-    private AppCompatTextView butShowPersAgreement;
-    private SwitchCompat swicthContract;
-    private SwitchCompat swicthPers;
-
-    private AppCompatButton butNext;
+    private ListView listView;
 
     private SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yy", Locale.US);
-    private Date dateBirth;
-    private Date datePassport;
-    private Date dateDriverLicense;
+    private Date dateBirth = new Date();
+    private Date datePassport = new Date();
+    private Date dateDriverLicense = new Date();
 
-    private File photoSelfie;
+    private File photo;
+
+
+
+    enum ItemsTypes {
+        HEADER, TEXTVIEW_WITH_IMG, EDITTEXT, SWITCH, TEXTVIEW_WITH_NARROW, BUTTON;
+        private static int[] ids = new int[]{
+                R.layout.list_view_header,
+                R.layout.list_text_with_img,
+                R.layout.list_edit_text_item,
+                R.layout.list_switch,
+                R.layout.list_text_with_img,
+                R.layout.list_button
+        };
+        int getLayoutID() {
+            return ids[this.ordinal()];
+        }
+        static int getLayoutID(int item) {
+            return ids[item];
+        }
+    }
+    private class ListItem {
+        ItemsTypes type;
+        String text;
+        Drawable img;
+        MaskFormatWatcher mfw;
+        boolean is_red;
+        boolean checked;
+        String usertext = "";
+
+        ListItem(ItemsTypes type, String text) {
+            this.type = type;
+            this.text = text;
+        }
+        ListItem setImg(Drawable img) {
+            this.img = img;
+            return this;
+        }
+        ListItem setMFW(MaskFormatWatcher mfw) {
+            this.mfw = mfw;
+            return this;
+        }
+    }
+    class MyAdapter extends BaseAdapter implements View.OnFocusChangeListener {
+        private ArrayList<ListItem> items;
+        MyAdapter() {
+            items = new ArrayList<>();
+        }
+        MyAdapter(ListItem[] items) {
+            this.items = new ArrayList<>(Arrays.asList(items));
+        }
+        public void addItem(ListItem item) {
+            items.add(item);
+        }
+        @Override
+        public int getViewTypeCount() {
+            return ItemsTypes.values().length;
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            return items.get(position).type.ordinal();
+        }
+
+        @Override
+        public int getCount() {
+            return items.size();
+        }
+
+        @Override
+        public Object getItem(int i) {
+            return items.get(i);
+        }
+
+        @Override
+        public long getItemId(int i) {
+            return i;
+        }
+
+        @Override
+        public View getView(int i, View convertView, ViewGroup viewGroup) {
+            // switch by enum
+            int itemType = getItemViewType(i);
+            if (convertView == null) {
+                convertView = getLayoutInflater().inflate(ItemsTypes.getLayoutID(itemType), viewGroup, false);
+            }
+            convertView.setOnFocusChangeListener(this);
+            TextView textView = (TextView) convertView;
+            final ListItem item = items.get(i);
+            convertView.setTag(item);
+
+            switch(ItemsTypes.values()[itemType]) {
+                case SWITCH:
+                    ((SwitchCompat) textView).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                        @Override
+                        public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                            item.checked = b;
+                        }
+                    });
+                case BUTTON:
+                case HEADER:
+                case TEXTVIEW_WITH_NARROW: {
+                    textView.setText(item.text);
+                    return convertView;
+                }
+                case TEXTVIEW_WITH_IMG: {
+                    textView.setText(item.text);
+                    textView.setCompoundDrawablesWithIntrinsicBounds(null, null, item.img, null);
+                    return convertView;
+                }
+                case EDITTEXT: {
+                    textView.setHint(item.text);
+                    textView.setText(item.usertext);
+                    textView.addTextChangedListener(new TextWatcher() {
+                        @Override
+                        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                        }
+
+                        @Override
+                        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                            item.usertext = charSequence.toString();
+                        }
+
+                        @Override
+                        public void afterTextChanged(Editable editable) {
+
+                        }
+                    });
+                    if (item.mfw != null) item.mfw.installOn(textView);
+                    if (item.is_red) textView.getBackground().setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP);
+                    return convertView;
+                }
+            }
+            return null;
+        }
+        @Override
+        public void onFocusChange(View view, boolean b) {
+            view.getBackground().clearColorFilter();
+            ((ListItem)view.getTag()).is_red = false;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reg);
-
+        final Resources resources = getResources();
         {
             ActionBar actionBar = getSupportActionBar();
             if (actionBar != null) {
@@ -115,242 +226,253 @@ public class RegActivity extends AppCompatActivity implements View.OnClickListen
             }
         }
 
-        //find elements
-        textName = findViewById(R.id.text_name);
-        textSurame = findViewById(R.id.text_surname);
-        textExname = findViewById(R.id.text_exname);
-        textBirthDate = findViewById(R.id.text_birthday);
-        textEMail = findViewById(R.id.text_email);
+        {
+            listView = (ListView)findViewById(R.id.list_pers_data);
+            listView.setHeaderDividersEnabled(false);
+            TextView header = (TextView) getLayoutInflater().inflate(R.layout.list_view_header, null);
+            header.setText(R.string.personal_data_section_header);
+            Log.d("11212","23erre");
 
-        textPassportNum = findViewById(R.id.text_passport_num);
-        textPassportWho = findViewById(R.id.text_passport_who);
-        textPassportDate = findViewById(R.id.text_passport_date);
-        butPassportSelfie = findViewById(R.id.button_passport_selfie);
-        butPassportPhoto1 = findViewById(R.id.button_passport_photo1);
-        butPassportPhoto2 = findViewById(R.id.button_passport_photo2);
+            Slot[] slotsDate = new UnderscoreDigitSlotsParser().parseSlots("__.__.__");
+            Slot[] slotsDL = new UnderscoreDigitSlotsParser().parseSlots("__ __ ______");
+            Slot[] slotsPassport = new UnderscoreDigitSlotsParser().parseSlots("__ __ ______");
 
-        textDriverLicenseNum = findViewById(R.id.text_driverlicense_num);
-        textDriverLicenseDate = findViewById(R.id.text_driverlicense_date);
-        butDriverLicensePhoto1 = findViewById(R.id.button_driverlicense_photo1);
-        butDriverLicensePhoto2 = findViewById(R.id.button_driverlicense_photo2);
+            MyAdapter adapter = new MyAdapter(
+                    new ListItem[] {
+                            new ListItem(ItemsTypes.HEADER,
+                                    resources.getString(R.string.personal_data_section_header)),
+                            new ListItem(ItemsTypes.EDITTEXT,
+                                    resources.getString(R.string.reg_surname)),
+                            new ListItem(ItemsTypes.EDITTEXT,
+                                    resources.getString(R.string.reg_name)),
+                            new ListItem(ItemsTypes.EDITTEXT,
+                                    resources.getString(R.string.reg_exname)),
+                            new ListItem(ItemsTypes.EDITTEXT,
+                                    resources.getString(R.string.reg_birthday))
+                                    .setMFW(new MaskFormatWatcher(MaskImpl.createTerminated(slotsDate))),
+                            new ListItem(ItemsTypes.EDITTEXT,
+                                    resources.getString(R.string.reg_email)),
 
-        butShowContact = findViewById(R.id.button_show_contract);
-        butShowPersAgreement = findViewById(R.id.button_show_pers_agreement);
-        swicthContract = findViewById(R.id.switch_agree_contract);
-        swicthPers = findViewById(R.id.switch_agree_pers);
+                            new ListItem(ItemsTypes.HEADER,
+                                    resources.getString(R.string.passport_section_header)),
+                            new ListItem(ItemsTypes.EDITTEXT,
+                                    resources.getString(R.string.reg_passport_num))
+                                    .setMFW(new MaskFormatWatcher(MaskImpl.createTerminated(slotsPassport))),
+                            new ListItem(ItemsTypes.EDITTEXT,
+                                    resources.getString(R.string.reg_passport_date))
+                                    .setMFW(new MaskFormatWatcher(MaskImpl.createTerminated(slotsDate))),
+                            new ListItem(ItemsTypes.TEXTVIEW_WITH_IMG,
+                                    resources.getString(R.string.reg_passport_photo_selfie))
+                                            .setImg(resources.getDrawable(R.drawable.ic_photo)),
+                            new ListItem(ItemsTypes.TEXTVIEW_WITH_IMG,
+                                    resources.getString(R.string.reg_passport_photo_first))
+                                    .setImg(resources.getDrawable(R.drawable.ic_photo)),
+                            new ListItem(ItemsTypes.TEXTVIEW_WITH_IMG,
+                                    resources.getString(R.string.reg_passport_photo_second))
+                                    .setImg(resources.getDrawable(R.drawable.ic_photo)),
 
-        butNext = findViewById(R.id.but_next);
+                            new ListItem(ItemsTypes.HEADER,
+                                    resources.getString(R.string.driverlicense_section_header)),
+                            new ListItem(ItemsTypes.EDITTEXT,
+                                    resources.getString(R.string.reg_driverlicense_num))
+                                    .setMFW(new MaskFormatWatcher(MaskImpl.createTerminated(slotsDL))),
+                            new ListItem(ItemsTypes.EDITTEXT,
+                                    resources.getString(R.string.reg_driverlicense_date))
+                                    .setMFW(new MaskFormatWatcher(MaskImpl.createTerminated(slotsDate))),
+                            new ListItem(ItemsTypes.TEXTVIEW_WITH_IMG,
+                                    resources.getString(R.string.reg_passport_photo_selfie))
+                                    .setImg(resources.getDrawable(R.drawable.ic_photo)),
+                            new ListItem(ItemsTypes.TEXTVIEW_WITH_IMG,
+                                    resources.getString(R.string.reg_passport_photo_first))
+                                    .setImg(resources.getDrawable(R.drawable.ic_photo)),
 
-        // set masks
-        { //passport
-            MaskFormatWatcher formatWatcher = new MaskFormatWatcher(
-                    MaskImpl.createTerminated(PredefinedSlots.RUS_PASSPORT)
+                            new ListItem(ItemsTypes.HEADER,
+                                    resources.getString(R.string.law_section_header)),
+                            new ListItem(ItemsTypes.TEXTVIEW_WITH_NARROW,
+                                    resources.getString(R.string.reg_law_contract)),
+                            new ListItem(ItemsTypes.SWITCH,
+                                    resources.getString(R.string.reg_law_contract_agree)),
+                            new ListItem(ItemsTypes.TEXTVIEW_WITH_NARROW,
+                                    resources.getString(R.string.reg_law_pers)),
+                            new ListItem(ItemsTypes.SWITCH,
+                                    resources.getString(R.string.reg_law_pers_agree)),
+
+                            new ListItem(ItemsTypes.BUTTON,
+                                    resources.getString(R.string.reg_next))
+                    }
             );
-            formatWatcher.installOn(textPassportNum);
-        }
-        { // driver license
-            Slot[] slots = new UnderscoreDigitSlotsParser().parseSlots("__ __ ______");
-            MaskFormatWatcher formatWatcher = new MaskFormatWatcher(
-                    MaskImpl.createTerminated(slots)
-            );
-            formatWatcher.installOn(textDriverLicenseNum);
-        }
-        { // dates
-            Slot[] slots = new UnderscoreDigitSlotsParser().parseSlots("__.__.__");
-            {
-                MaskFormatWatcher formatWatcher = new MaskFormatWatcher(MaskImpl.createTerminated(slots));
-                formatWatcher.installOn(textBirthDate);
-            }
-            {
-                MaskFormatWatcher formatWatcher = new MaskFormatWatcher(MaskImpl.createTerminated(slots));
-                formatWatcher.installOn(textPassportDate);
-            }
-            {
-                MaskFormatWatcher formatWatcher = new MaskFormatWatcher(MaskImpl.createTerminated(slots));
-                formatWatcher.installOn(textDriverLicenseDate);
-            }
+
+            listView.setAdapter(adapter);
+            listView.setOnItemClickListener(this);
+
         }
 
-        butNext.setOnClickListener(this);
-        butShowPersAgreement.setOnClickListener(this);
-        butShowContact.setOnClickListener(this);
-        butPassportSelfie.setOnClickListener(this);
-        butPassportPhoto1.setOnClickListener(this);
-        butPassportPhoto2.setOnClickListener(this);
-        butDriverLicensePhoto1.setOnClickListener(this);
-        butDriverLicensePhoto2.setOnClickListener(this);
-
-        textName.setOnFocusChangeListener(this);
-        textSurame.setOnFocusChangeListener(this);
-        textExname.setOnFocusChangeListener(this);
-        textBirthDate.setOnFocusChangeListener(this);
-        textEMail.setOnFocusChangeListener(this);
-
-        textPassportNum.setOnFocusChangeListener(this);
-        textPassportWho.setOnFocusChangeListener(this);
-        textPassportDate.setOnFocusChangeListener(this);
-
-        textDriverLicenseNum.setOnFocusChangeListener(this);
-        textDriverLicenseDate.setOnFocusChangeListener(this);
     }
 
-    private void markRed(View view) {
-        view.getBackground().setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP);
+    private void markRed(ListItem item) {
+        item.is_red = true;
+        listView.invalidateViews();
     }
 
-    private boolean checkLength(AppCompatEditText editText, int length) {
-        if (editText.getText().length() == length) {
+    private boolean checkLength(int i, int length) {
+        ListItem item = ((ListItem)listView.getAdapter().getItem(i));
+            if (item.usertext.length() == length) {
             return true;
         } else {
-            markRed(editText);
+            markRed(item);
             return false;
         }
     }
 
-    private boolean checkNotEmpty(AppCompatEditText editText) {
-        if (editText.getText().length() != 0)
+    private boolean checkNotEmpty(int i) {
+        ListItem item = ((ListItem)listView.getAdapter().getItem(i));
+        if (item.usertext.length() > 0) {
             return true;
-        else {
-            markRed(editText);
+        } else {
+            markRed(item);
             return false;
         }
     }
 
     // Date date - obj to save parsed date
-    private boolean checkDate(AppCompatEditText editText, Date date) {
+    private boolean checkDate(int i, Date date) {
+        ListItem item = ((ListItem)listView.getAdapter().getItem(i));
         try {
-            date = sdf.parse(editText.getText().toString());
+            // save Date
+            date.setTime(sdf.parse(item.usertext).getTime());
         } catch (ParseException e) {
-            markRed(editText);
+            item.is_red = true;
+            listView.invalidateViews();
             return false;
         }
         if (date != null) {
             return true;
         } else {
-            markRed(editText);
+            item.is_red = true;
+            listView.invalidateViews();
             return false;
         }
     }
 
-    private boolean checkEmail(AppCompatEditText editText) {
-        Matcher matcher = VALID_EMAIL_ADDRESS_REGEX .matcher(editText.getText());
+    private boolean checkEmail(int i) {
+        ListItem item = ((ListItem)listView.getAdapter().getItem(i));
+        Matcher matcher = VALID_EMAIL_ADDRESS_REGEX .matcher(item.usertext);
         if (matcher.find()) {
             return true;
         } else  {
-            markRed(editText);
+            markRed(item);
             return false;
         }
     }
 
-    private boolean checkSwitch(SwitchCompat switchCompat) {
-        if (switchCompat.isChecked())
+    private boolean checkSwitch(int i) {
+        ListItem item = ((ListItem)listView.getAdapter().getItem(i));
+        if (item.checked)
             return true;
         else {
-            markRed(switchCompat);
+            markRed(item);
             return false;
         }
     }
 
     private boolean check() {
         boolean flag = true;
-        // pers data fields must be not empty
-        if (!checkNotEmpty(textName)) flag = false;
-        if (!checkNotEmpty(textSurame)) flag = false;
-        if (!checkNotEmpty(textExname)) flag = false;
-        if (!checkNotEmpty(textPassportWho)) flag = false;
+        /// pers data fields must be not empty
+        if (!checkNotEmpty(1)) flag = false;
+        if (!checkNotEmpty(2)) flag = false;
+        if (!checkNotEmpty(3)) flag = false;
+        //if (!checkNotEmpty(7)) flag = false;
 
         // easy check email
-        if (!checkEmail(textEMail)) flag = false;
+        if (!checkEmail(5)) flag = false;
 
         // check num passport and num driver license
         // only check length
         // other checked by tinkoff
-        if (!checkLength(textPassportNum, 11)) flag = false; // хххх хххххх
-        if (!checkLength(textDriverLicenseNum, 12)) flag = false; // хх хх хххххх
+        if (!checkLength(7, 11)) flag = false; // хххх хххххх
+        if (!checkLength(13, 12)) flag = false; // хх хх хххххх
 
         //check date fields
-        if (!checkDate(textBirthDate, dateBirth)) flag = false;
-        if (!checkDate(textPassportDate, datePassport)) flag = false;
-        if (!checkDate(textDriverLicenseDate, dateDriverLicense)) flag = false;
+        if (!checkDate(4, dateBirth)) flag = false;
+        if (!checkDate(8, datePassport)) flag = false;
+        if (!checkDate(14, dateDriverLicense)) flag = false;
 
         // check that switches are checked
-        if (!checkSwitch(swicthContract)) flag = false;
-        if (!checkSwitch(swicthPers)) flag = false;
+        if (!checkSwitch(19)) flag = false;
+        if (!checkSwitch(21)) flag = false;
 
         return flag;
     }
 
+
     @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.but_next:
-                if (check()) {
-                    Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_LONG).show();
-                    // successful registration
-                } else break;
-            case R.id.button_show_contract:
-                {
-                    Intent intent = new Intent(getApplicationContext(), WebViewActivity.class);
-                    intent.putExtra(
-                            WebViewActivity.extraTitle,
-                            getResources().getString(R.string.сontract_activity_title)
-                    );
-                    intent.putExtra(
-                            WebViewActivity.extraURL,
-                            //"https://lifcar.ru/"
-                            "https://drive.google.com/viewerng/viewer?embedded=true&url=https://lifcar.ru/lifcar_agreement.pdf"
-                    );
-                    startActivity(intent);
-                }
-                break;
-            case R.id.button_show_pers_agreement:
-                {
-                    Intent intent = new Intent(getApplicationContext(), WebViewActivity.class);
-                    intent.putExtra(
-                            WebViewActivity.extraTitle,
-                            getResources().getString(R.string.pers_activity_title)
-                    );
-                    intent.putExtra(
-                            WebViewActivity.extraURL,
-                            //"https://ya.ru"
-                            "https://drive.google.com/viewerng/viewer?embedded=true&url=https://lifcar.ru/lifcar_agreement.pdf"
-                    );
-                    startActivity(intent);
-                }
-                break;
-            case R.id.button_passport_selfie:
-            case R.id.button_passport_photo1:
-            case R.id.button_passport_photo2:
-            case R.id.button_driverlicense_photo1:
-            case R.id.button_driverlicense_photo2:
-                {
+    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+        // TO DO change to ids
+        switch (i) {
+            case 9:
+            case 10:
+            case 11:
+            case 15:
+            case 16:
+            {
                 Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
                 try {
                     // create file for save photo
                     // filename defined by button ID
-                    photoSelfie = new File(storageDir, getPhotoFileName(view.getId()));
-                    photoSelfie.createNewFile();
+                    photo = new File(storageDir, getPhotoFileName(i));
+                    photo.createNewFile();
                 } catch (IOException e) {
                     e.printStackTrace();
                     break;
                 }
                 Uri photoURI = FileProvider.getUriForFile(this,
                         "com.example.pavel.testregistrationform.fileprovider",
-                        photoSelfie);
+                        photo);
 
                 intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
 
-                //get requestCode
-                int rCode = Arrays.binarySearch(requestCode_to_ID, view.getId());
-                this.startActivityForResult(intent, rCode);
+                //request code is item number
+                this.startActivityForResult(intent, i);
             }
-                break;
-            default: break;
+            case 18:
+            {
+                Intent intent = new Intent(getApplicationContext(), WebViewActivity.class);
+                intent.putExtra(
+                        WebViewActivity.extraTitle,
+                        getResources().getString(R.string.сontract_activity_title)
+                );
+                intent.putExtra(
+                        WebViewActivity.extraURL,
+                        //"https://lifcar.ru/"
+                        "https://drive.google.com/viewerng/viewer?embedded=true&url=https://lifcar.ru/lifcar_agreement.pdf"
+                );
+                startActivity(intent);
+            }
+            break;
+            case 20:
+            {
+                Intent intent = new Intent(getApplicationContext(), WebViewActivity.class);
+                intent.putExtra(
+                        WebViewActivity.extraTitle,
+                        getResources().getString(R.string.pers_activity_title)
+                );
+                intent.putExtra(
+                        WebViewActivity.extraURL,
+                        //"https://ya.ru"
+                        "https://drive.google.com/viewerng/viewer?embedded=true&url=https://lifcar.ru/lifcar_agreement.pdf"
+                );
+                startActivity(intent);
+            }
+            break;
+            case 22:
+                if (check()) {
+                    Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_LONG).show();
+                    // successful registration
+                } else break;
+            break;
         }
     }
-
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -358,26 +480,18 @@ public class RegActivity extends AppCompatActivity implements View.OnClickListen
 
         if (resultCode == RESULT_CANCELED) return;
 
-        // get ID of pressed button by requestCode
-        int butID = requestCode_to_ID[requestCode];
-
         // get and resize photo
         int size = spToPx(20, this);
-        Bitmap b = BitmapFactory.decodeFile(photoSelfie.getAbsolutePath());
+        Bitmap b = BitmapFactory.decodeFile(photo.getAbsolutePath());
         Bitmap resizedBitmap = Bitmap.createScaledBitmap(
             b, size, size, false);
         b.recycle();
 
         // show small photo
         Drawable drawable = new BitmapDrawable(getResources(), resizedBitmap);
-        ((AppCompatTextView)findViewById(butID))
-                .setCompoundDrawablesWithIntrinsicBounds(null, null, drawable, null);
+        ((ListItem)listView.getAdapter().getItem(requestCode)).setImg(drawable);
+        listView.invalidateViews();
 
-    }
-
-    @Override
-    public void onFocusChange(View view, boolean b) {
-        view.getBackground().clearColorFilter();
     }
 
     public static int spToPx(float sp, Context context) {
@@ -385,11 +499,11 @@ public class RegActivity extends AppCompatActivity implements View.OnClickListen
     }
     public static String getPhotoFileName(int resId) {
         switch (resId) {
-            case R.id.button_passport_selfie: return PHOTO_SELFIE_FILE_NAME;
-            case R.id.button_passport_photo1: return PHOTO_PAS1_FILE_NAME;
-            case R.id.button_passport_photo2: return PHOTO_PAS2_FILE_NAME;
-            case R.id.button_driverlicense_photo1: return PHOTO_DL1_FILE_NAME;
-            case R.id.button_driverlicense_photo2: return PHOTO_DL2_FILE_NAME;
+            case 9: return PHOTO_SELFIE_FILE_NAME;
+            case 10: return PHOTO_PAS1_FILE_NAME;
+            case 11: return PHOTO_PAS2_FILE_NAME;
+            case 15: return PHOTO_DL1_FILE_NAME;
+            case 16: return PHOTO_DL2_FILE_NAME;
 
             default: return null;
         }

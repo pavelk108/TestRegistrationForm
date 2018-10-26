@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.AppCompatTextView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/but_next"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="@dimen/textviews_padding"
+    android:paddingBottom="@dimen/textviews_padding"
+    android:background="@drawable/button_background"
+    android:textColor="#fff"
+    android:clickable="false"
+    android:enabled="false"
+    android:gravity="center"
+    />
