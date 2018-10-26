@@ -350,9 +350,13 @@ public class RegActivity extends AppCompatActivity implements View.OnClickListen
         }
     }
 
+
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == RESULT_CANCELED) return;
 
         // get ID of pressed button by requestCode
         int butID = requestCode_to_ID[requestCode];
