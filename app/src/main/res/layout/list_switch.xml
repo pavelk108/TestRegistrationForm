@@ -7,4 +7,5 @@
     android:textSize="@dimen/reg_main_text_size"
     android:paddingTop="@dimen/textviews_padding"
     android:paddingBottom="@dimen/textviews_padding"
+    android:padding="@dimen/reg_main_margin"
     />

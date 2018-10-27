@@ -11,4 +11,5 @@
     android:drawableRight="@drawable/small_narrow"
     android:paddingEnd="@dimen/icon_photo_padding"
     android:paddingRight="@dimen/icon_photo_padding"
+    android:padding="@dimen/reg_main_margin"
     />
