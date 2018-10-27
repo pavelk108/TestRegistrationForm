@@ -79,6 +79,9 @@ public class RegActivity extends AppCompatActivity implements ListView.OnItemCli
     private static final int ITEM_ID_AGREE_AGREEMENT = 19;
     private static final int ITEM_ID_NEXT = 20;
 
+    private static final String MASK_DATE = "__.__.__";
+    private static final String MASK_PAS_NUM = "__ __ ______";
+    private static final String MASK_DL_NUM = "__ __ ______";
 
 
     private ListView listView;
@@ -269,9 +272,9 @@ public class RegActivity extends AppCompatActivity implements ListView.OnItemCli
             TextView header = (TextView) getLayoutInflater().inflate(R.layout.list_view_header, null);
             header.setText(R.string.personal_data_section_header);
 
-            Slot[] slotsDate = new UnderscoreDigitSlotsParser().parseSlots("__.__.__");
-            Slot[] slotsDL = new UnderscoreDigitSlotsParser().parseSlots("__ __ ______");
-            Slot[] slotsPassport = new UnderscoreDigitSlotsParser().parseSlots("__ __ ______");
+            Slot[] slotsDate = new UnderscoreDigitSlotsParser().parseSlots(MASK_DATE);
+            Slot[] slotsDL = new UnderscoreDigitSlotsParser().parseSlots(MASK_DL_NUM);
+            Slot[] slotsPassport = new UnderscoreDigitSlotsParser().parseSlots(MASK_PAS_NUM);
 
             adapter = new MyAdapter(
                     new ListItem[] {
@@ -447,8 +450,8 @@ public class RegActivity extends AppCompatActivity implements ListView.OnItemCli
         // check num passport and num driver license
         // only check length
         // other checked by tinkoff
-        if (!checkLength(ITEM_ID_PAS_NUM, 12)) flag = false; // хх хх хххххх
-        if (!checkLength(ITEM_ID_DL_NUM, 12)) flag = false; // хх хх хххххх
+        if (!checkLength(ITEM_ID_PAS_NUM, MASK_PAS_NUM.length())) flag = false;
+        if (!checkLength(ITEM_ID_DL_NUM, MASK_DL_NUM.length())) flag = false;
 
         //check date fields
         if (!checkDate(ITEM_ID_BIRTHDATE, dateBirth)) flag = false;
