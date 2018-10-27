@@ -58,7 +58,31 @@ public class RegActivity extends AppCompatActivity implements ListView.OnItemCli
     public static final String PHOTO_DL1_FILE_NAME = "photoDL1.jpg";
     public static final String PHOTO_DL2_FILE_NAME = "photoDL2.jpg";
 
+    private static final int ITEM_ID_SURNAME = 1;
+    private static final int ITEM_ID_NAME = 2;
+    private static final int ITEM_ID_EXNAME = 3;
+    private static final int ITEM_ID_BIRTHDATE = 4;
+    private static final int ITEM_ID_EMAIL = 5;
+    private static final int ITEM_ID_PAS_NUM = 6;
+    private static final int ITEM_ID_PAS_DATE = 7;
+    private static final int ITEM_ID_PAS_WHO = 8;
+    private static final int ITEM_ID_PAS_SELFIE = 9;
+    private static final int ITEM_ID_PAS_PHOTO1 = 10;
+    private static final int ITEM_ID_PAS_PHOTO2 = 11;
+    private static final int ITEM_ID_DL_NUM = 12;
+    private static final int ITEM_ID_DL_DATE = 13;
+    private static final int ITEM_ID_DL_PHOTO1 = 14;
+    private static final int ITEM_ID_DL_PHOTO2 = 15;
+    private static final int ITEM_ID_SHOW_CONTRACT = 16;
+    private static final int ITEM_ID_AGREE_CONTRACT = 17;
+    private static final int ITEM_ID_SHOW_AGREEMENT = 18;
+    private static final int ITEM_ID_AGREE_AGREEMENT = 19;
+    private static final int ITEM_ID_NEXT = 20;
+
+
+
     private ListView listView;
+    private MyAdapter adapter;
 
     private SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yy", Locale.US);
     private Date dateBirth = new Date();
@@ -87,13 +111,14 @@ public class RegActivity extends AppCompatActivity implements ListView.OnItemCli
         }
     }
     private class ListItem {
+        int id = 0;
         ItemsTypes type;
         String text;
         Drawable img;
         MaskFormatWatcher mfw;
         boolean is_red;
         boolean checked;
-        String usertext = "";
+        String usertext = ""; // text in edittext, "text" use as hint
 
         ListItem(ItemsTypes type, String text) {
             this.type = type;
@@ -105,6 +130,10 @@ public class RegActivity extends AppCompatActivity implements ListView.OnItemCli
         }
         ListItem setMFW(MaskFormatWatcher mfw) {
             this.mfw = mfw;
+            return this;
+        }
+        ListItem setID(int id) {
+            this.id = id;
             return this;
         }
     }
@@ -135,8 +164,16 @@ public class RegActivity extends AppCompatActivity implements ListView.OnItemCli
         }
 
         @Override
-        public Object getItem(int i) {
+        public ListItem getItem(int i) {
             return items.get(i);
+        }
+
+        public ListItem getItemByID(int id) {
+            for (ListItem item : items) {
+                if (item.id == id)
+                    return item;
+            }
+            return null;
         }
 
         @Override
@@ -227,78 +264,99 @@ public class RegActivity extends AppCompatActivity implements ListView.OnItemCli
         }
 
         {
-            listView = (ListView)findViewById(R.id.list_pers_data);
+            listView = findViewById(R.id.list_pers_data);
             listView.setHeaderDividersEnabled(false);
             TextView header = (TextView) getLayoutInflater().inflate(R.layout.list_view_header, null);
             header.setText(R.string.personal_data_section_header);
-            Log.d("11212","23erre");
 
             Slot[] slotsDate = new UnderscoreDigitSlotsParser().parseSlots("__.__.__");
             Slot[] slotsDL = new UnderscoreDigitSlotsParser().parseSlots("__ __ ______");
             Slot[] slotsPassport = new UnderscoreDigitSlotsParser().parseSlots("__ __ ______");
 
-            MyAdapter adapter = new MyAdapter(
+            adapter = new MyAdapter(
                     new ListItem[] {
                             new ListItem(ItemsTypes.HEADER,
                                     resources.getString(R.string.personal_data_section_header)),
                             new ListItem(ItemsTypes.EDITTEXT,
-                                    resources.getString(R.string.reg_surname)),
+                                    resources.getString(R.string.reg_surname))
+                                    .setID(ITEM_ID_SURNAME),
                             new ListItem(ItemsTypes.EDITTEXT,
-                                    resources.getString(R.string.reg_name)),
+                                    resources.getString(R.string.reg_name))
+                                    .setID(ITEM_ID_NAME),
                             new ListItem(ItemsTypes.EDITTEXT,
-                                    resources.getString(R.string.reg_exname)),
+                                    resources.getString(R.string.reg_exname))
+                                    .setID(ITEM_ID_EXNAME),
                             new ListItem(ItemsTypes.EDITTEXT,
                                     resources.getString(R.string.reg_birthday))
+                                    .setID(ITEM_ID_BIRTHDATE)
                                     .setMFW(new MaskFormatWatcher(MaskImpl.createTerminated(slotsDate))),
                             new ListItem(ItemsTypes.EDITTEXT,
-                                    resources.getString(R.string.reg_email)),
+                                    resources.getString(R.string.reg_email))
+                                    .setID(ITEM_ID_EMAIL),
 
                             new ListItem(ItemsTypes.HEADER,
                                     resources.getString(R.string.passport_section_header)),
                             new ListItem(ItemsTypes.EDITTEXT,
                                     resources.getString(R.string.reg_passport_num))
+                                    .setID(ITEM_ID_PAS_NUM)
                                     .setMFW(new MaskFormatWatcher(MaskImpl.createTerminated(slotsPassport))),
                             new ListItem(ItemsTypes.EDITTEXT,
                                     resources.getString(R.string.reg_passport_date))
+                                    .setID(ITEM_ID_PAS_DATE)
+                                    .setMFW(new MaskFormatWatcher(MaskImpl.createTerminated(slotsDate))),
+                            new ListItem(ItemsTypes.EDITTEXT,
+                                    resources.getString(R.string.reg_passport_who))
+                                    .setID(ITEM_ID_PAS_WHO)
                                     .setMFW(new MaskFormatWatcher(MaskImpl.createTerminated(slotsDate))),
                             new ListItem(ItemsTypes.TEXTVIEW_WITH_IMG,
                                     resources.getString(R.string.reg_passport_photo_selfie))
-                                            .setImg(resources.getDrawable(R.drawable.ic_photo)),
+                                    .setImg(resources.getDrawable(R.drawable.ic_photo))
+                                    .setID(ITEM_ID_PAS_SELFIE),
                             new ListItem(ItemsTypes.TEXTVIEW_WITH_IMG,
                                     resources.getString(R.string.reg_passport_photo_first))
+                                    .setID(ITEM_ID_PAS_PHOTO1)
                                     .setImg(resources.getDrawable(R.drawable.ic_photo)),
                             new ListItem(ItemsTypes.TEXTVIEW_WITH_IMG,
                                     resources.getString(R.string.reg_passport_photo_second))
+                                    .setID(ITEM_ID_PAS_PHOTO2)
                                     .setImg(resources.getDrawable(R.drawable.ic_photo)),
 
                             new ListItem(ItemsTypes.HEADER,
                                     resources.getString(R.string.driverlicense_section_header)),
                             new ListItem(ItemsTypes.EDITTEXT,
                                     resources.getString(R.string.reg_driverlicense_num))
+                                    .setID(ITEM_ID_DL_NUM)
                                     .setMFW(new MaskFormatWatcher(MaskImpl.createTerminated(slotsDL))),
                             new ListItem(ItemsTypes.EDITTEXT,
                                     resources.getString(R.string.reg_driverlicense_date))
+                                    .setID(ITEM_ID_DL_DATE)
                                     .setMFW(new MaskFormatWatcher(MaskImpl.createTerminated(slotsDate))),
                             new ListItem(ItemsTypes.TEXTVIEW_WITH_IMG,
-                                    resources.getString(R.string.reg_passport_photo_selfie))
+                                    resources.getString(R.string.reg_driverlicense_photo_first))
+                                    .setID(ITEM_ID_DL_PHOTO1)
                                     .setImg(resources.getDrawable(R.drawable.ic_photo)),
                             new ListItem(ItemsTypes.TEXTVIEW_WITH_IMG,
-                                    resources.getString(R.string.reg_passport_photo_first))
+                                    resources.getString(R.string.reg_driverlicense_photo_second))
+                                    .setID(ITEM_ID_DL_PHOTO2)
                                     .setImg(resources.getDrawable(R.drawable.ic_photo)),
 
                             new ListItem(ItemsTypes.HEADER,
                                     resources.getString(R.string.law_section_header)),
                             new ListItem(ItemsTypes.TEXTVIEW_WITH_NARROW,
-                                    resources.getString(R.string.reg_law_contract)),
+                                    resources.getString(R.string.reg_law_contract))
+                                    .setID(ITEM_ID_SHOW_CONTRACT),
                             new ListItem(ItemsTypes.SWITCH,
-                                    resources.getString(R.string.reg_law_contract_agree)),
+                                    resources.getString(R.string.reg_law_contract_agree))
+                                    .setID(ITEM_ID_AGREE_CONTRACT),
                             new ListItem(ItemsTypes.TEXTVIEW_WITH_NARROW,
-                                    resources.getString(R.string.reg_law_pers)),
+                                    resources.getString(R.string.reg_law_pers))
+                                    .setID(ITEM_ID_SHOW_AGREEMENT),
                             new ListItem(ItemsTypes.SWITCH,
-                                    resources.getString(R.string.reg_law_pers_agree)),
-
+                                    resources.getString(R.string.reg_law_pers_agree))
+                                    .setID(ITEM_ID_AGREE_AGREEMENT),
                             new ListItem(ItemsTypes.BUTTON,
                                     resources.getString(R.string.reg_next))
+                                    .setID(ITEM_ID_NEXT)
                     }
             );
 
@@ -314,8 +372,8 @@ public class RegActivity extends AppCompatActivity implements ListView.OnItemCli
         listView.invalidateViews();
     }
 
-    private boolean checkLength(int i, int length) {
-        ListItem item = ((ListItem)listView.getAdapter().getItem(i));
+    private boolean checkLength(int id, int length) {
+        ListItem item = adapter.getItemByID(id);
             if (item.usertext.length() == length) {
             return true;
         } else {
@@ -324,8 +382,8 @@ public class RegActivity extends AppCompatActivity implements ListView.OnItemCli
         }
     }
 
-    private boolean checkNotEmpty(int i) {
-        ListItem item = ((ListItem)listView.getAdapter().getItem(i));
+    private boolean checkNotEmpty(int id) {
+        ListItem item = adapter.getItemByID(id);
         if (item.usertext.length() > 0) {
             return true;
         } else {
@@ -335,8 +393,8 @@ public class RegActivity extends AppCompatActivity implements ListView.OnItemCli
     }
 
     // Date date - obj to save parsed date
-    private boolean checkDate(int i, Date date) {
-        ListItem item = ((ListItem)listView.getAdapter().getItem(i));
+    private boolean checkDate(int id, Date date) {
+        ListItem item = adapter.getItemByID(id);
         try {
             // save Date
             date.setTime(sdf.parse(item.usertext).getTime());
@@ -354,8 +412,8 @@ public class RegActivity extends AppCompatActivity implements ListView.OnItemCli
         }
     }
 
-    private boolean checkEmail(int i) {
-        ListItem item = ((ListItem)listView.getAdapter().getItem(i));
+    private boolean checkEmail(int id) {
+        ListItem item = adapter.getItemByID(id);
         Matcher matcher = VALID_EMAIL_ADDRESS_REGEX .matcher(item.usertext);
         if (matcher.find()) {
             return true;
@@ -365,8 +423,8 @@ public class RegActivity extends AppCompatActivity implements ListView.OnItemCli
         }
     }
 
-    private boolean checkSwitch(int i) {
-        ListItem item = ((ListItem)listView.getAdapter().getItem(i));
+    private boolean checkSwitch(int id) {
+        ListItem item = adapter.getItemByID(id);
         if (item.checked)
             return true;
         else {
@@ -378,28 +436,28 @@ public class RegActivity extends AppCompatActivity implements ListView.OnItemCli
     private boolean check() {
         boolean flag = true;
         /// pers data fields must be not empty
-        if (!checkNotEmpty(1)) flag = false;
-        if (!checkNotEmpty(2)) flag = false;
-        if (!checkNotEmpty(3)) flag = false;
-        //if (!checkNotEmpty(7)) flag = false;
+        if (!checkNotEmpty(ITEM_ID_SURNAME)) flag = false;
+        if (!checkNotEmpty(ITEM_ID_NAME)) flag = false;
+        if (!checkNotEmpty(ITEM_ID_EXNAME)) flag = false;
+        if (!checkNotEmpty(ITEM_ID_PAS_WHO)) flag = false;
 
         // easy check email
-        if (!checkEmail(5)) flag = false;
+        if (!checkEmail(ITEM_ID_EMAIL)) flag = false;
 
         // check num passport and num driver license
         // only check length
         // other checked by tinkoff
-        if (!checkLength(7, 11)) flag = false; // хххх хххххх
-        if (!checkLength(13, 12)) flag = false; // хх хх хххххх
+        if (!checkLength(ITEM_ID_PAS_NUM, 12)) flag = false; // хх хх хххххх
+        if (!checkLength(ITEM_ID_DL_NUM, 12)) flag = false; // хх хх хххххх
 
         //check date fields
-        if (!checkDate(4, dateBirth)) flag = false;
-        if (!checkDate(8, datePassport)) flag = false;
-        if (!checkDate(14, dateDriverLicense)) flag = false;
+        if (!checkDate(ITEM_ID_BIRTHDATE, dateBirth)) flag = false;
+        if (!checkDate(ITEM_ID_PAS_DATE, datePassport)) flag = false;
+        if (!checkDate(ITEM_ID_DL_DATE, dateDriverLicense)) flag = false;
 
         // check that switches are checked
-        if (!checkSwitch(19)) flag = false;
-        if (!checkSwitch(21)) flag = false;
+        if (!checkSwitch(ITEM_ID_AGREE_CONTRACT)) flag = false;
+        if (!checkSwitch(ITEM_ID_AGREE_AGREEMENT)) flag = false;
 
         return flag;
     }
@@ -408,12 +466,12 @@ public class RegActivity extends AppCompatActivity implements ListView.OnItemCli
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         // TO DO change to ids
-        switch (i) {
-            case 9:
-            case 10:
-            case 11:
-            case 15:
-            case 16:
+        switch (adapter.getItem(i).id) {
+            case ITEM_ID_DL_PHOTO1:
+            case ITEM_ID_DL_PHOTO2:
+            case ITEM_ID_PAS_PHOTO1:
+            case ITEM_ID_PAS_PHOTO2:
+            case ITEM_ID_PAS_SELFIE:
             {
                 Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
@@ -435,7 +493,7 @@ public class RegActivity extends AppCompatActivity implements ListView.OnItemCli
                 //request code is item number
                 this.startActivityForResult(intent, i);
             }
-            case 18:
+            case ITEM_ID_SHOW_CONTRACT:
             {
                 Intent intent = new Intent(getApplicationContext(), WebViewActivity.class);
                 intent.putExtra(
@@ -450,7 +508,7 @@ public class RegActivity extends AppCompatActivity implements ListView.OnItemCli
                 startActivity(intent);
             }
             break;
-            case 20:
+            case ITEM_ID_SHOW_AGREEMENT:
             {
                 Intent intent = new Intent(getApplicationContext(), WebViewActivity.class);
                 intent.putExtra(
@@ -465,7 +523,7 @@ public class RegActivity extends AppCompatActivity implements ListView.OnItemCli
                 startActivity(intent);
             }
             break;
-            case 22:
+            case ITEM_ID_NEXT:
                 if (check()) {
                     Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_LONG).show();
                     // successful registration
