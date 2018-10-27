@@ -11,9 +11,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#fff"
+        >
+        <!--
+        Hide separators
         android:dividerHeight="0sp"
         android:divider="@android:color/transparent"
-        >
+        -->
     </ListView>
 
 </android.support.constraint.ConstraintLayout>
