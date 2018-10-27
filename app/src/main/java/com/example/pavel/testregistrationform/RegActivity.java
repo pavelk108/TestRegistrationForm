@@ -419,16 +419,15 @@ public class RegActivity extends AppCompatActivity implements ListView.OnItemCli
         try {
             // save Date
             date.setTime(sdf.parse(item.usertext).getTime());
-        } catch (ParseException e) {
+            if (!sdf.format(date).equals(item.usertext)) {
+                markRed(item);
+                return false;
+            }
+        } catch (Exception e) {
             markRed(item);
             return false;
         }
-        if (date != null) {
-            return true;
-        } else {
-            markRed(item);
-            return false;
-        }
+        return true;
     }
 
     private boolean checkEmail(int id) {
