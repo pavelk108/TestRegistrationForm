@@ -121,6 +121,7 @@ public class RegActivity extends AppCompatActivity implements ListView.OnItemCli
         MaskFormatWatcher mfw;
         boolean is_red;
         boolean checked;
+        TextWatcher textWatcher;
         String usertext = ""; // text in edittext, "text" use as hint
 
         ListItem(ItemsTypes type, String text) {
@@ -194,7 +195,7 @@ public class RegActivity extends AppCompatActivity implements ListView.OnItemCli
             convertView.setOnFocusChangeListener(this);
             TextView textView = (TextView) convertView;
             final ListItem item = items.get(i);
-            convertView.setTag(item);
+            final ListItem oldItem = (ListItem)convertView.getTag();
 
             switch(ItemsTypes.values()[itemType]) {
                 case SWITCH:
@@ -208,38 +209,55 @@ public class RegActivity extends AppCompatActivity implements ListView.OnItemCli
                 case HEADER:
                 case TEXTVIEW_WITH_NARROW: {
                     textView.setText(item.text);
-                    return convertView;
+                    break;
                 }
                 case TEXTVIEW_WITH_IMG: {
                     textView.setText(item.text);
                     textView.setCompoundDrawablesWithIntrinsicBounds(null, null, item.img, null);
-                    return convertView;
+                    break;
                 }
                 case EDITTEXT: {
+                    if (oldItem != null) {
+                        // remove our old listener
+                        textView.removeTextChangedListener(oldItem.textWatcher);
+                        if (oldItem.mfw != null) {// try to remove tinkoff listener
+                            // tinkoff know only about last textView
+                            // and it doesn't remove its listener, when install on new textView
+                            if (oldItem.mfw.isAttachedTo(textView)) {
+                                oldItem.mfw.removeFromTextView();
+                            } else {
+                                textView.removeTextChangedListener(oldItem.mfw);
+                            }
+                        }
+                    }
+                    if (item.textWatcher == null) {
+                        // first query for this item
+                        // create textWatcher
+                        item.textWatcher = new TextWatcher() {
+                            @Override
+                            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                            }
+
+                            @Override
+                            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                                item.usertext = charSequence.toString();
+                            }
+
+                            @Override
+                            public void afterTextChanged(Editable editable) {
+                            }
+                        };
+                    }
+                    if (item.mfw != null) item.mfw.installOn(textView);
                     textView.setHint(item.text);
                     textView.setText(item.usertext);
-                    textView.addTextChangedListener(new TextWatcher() {
-                        @Override
-                        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-                        }
-
-                        @Override
-                        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                            item.usertext = charSequence.toString();
-                        }
-
-                        @Override
-                        public void afterTextChanged(Editable editable) {
-
-                        }
-                    });
-                    if (item.mfw != null) item.mfw.installOn(textView);
+                    textView.addTextChangedListener(item.textWatcher);
                     if (item.is_red) textView.getBackground().setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP);
-                    return convertView;
+                    break;
                 }
             }
-            return null;
+            convertView.setTag(item);
+            return convertView;
         }
         @Override
         public void onFocusChange(View view, boolean b) {
@@ -402,15 +420,13 @@ public class RegActivity extends AppCompatActivity implements ListView.OnItemCli
             // save Date
             date.setTime(sdf.parse(item.usertext).getTime());
         } catch (ParseException e) {
-            item.is_red = true;
-            listView.invalidateViews();
+            markRed(item);
             return false;
         }
         if (date != null) {
             return true;
         } else {
-            item.is_red = true;
-            listView.invalidateViews();
+            markRed(item);
             return false;
         }
     }
