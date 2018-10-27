@@ -5,8 +5,6 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -17,29 +15,17 @@ import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.AppCompatEditText;
-import android.support.v7.widget.SwitchCompat;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.BaseAdapter;
-import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -48,6 +34,8 @@ import ru.tinkoff.decoro.MaskImpl;
 import ru.tinkoff.decoro.parser.UnderscoreDigitSlotsParser;
 import ru.tinkoff.decoro.slots.Slot;
 import ru.tinkoff.decoro.watchers.MaskFormatWatcher;
+import com.example.pavel.testregistrationform.MyAdapter.ListItem;
+import com.example.pavel.testregistrationform.MyAdapter.ItemsTypes;
 
 public class RegActivity extends AppCompatActivity implements ListView.OnItemClickListener {
     public static final Pattern VALID_EMAIL_ADDRESS_REGEX =
@@ -94,178 +82,6 @@ public class RegActivity extends AppCompatActivity implements ListView.OnItemCli
 
     private File photo;
 
-
-
-    enum ItemsTypes {
-        HEADER, TEXTVIEW_WITH_IMG, EDITTEXT, SWITCH, TEXTVIEW_WITH_NARROW, BUTTON;
-        private static int[] ids = new int[]{
-                R.layout.list_view_header,
-                R.layout.list_text_with_img,
-                R.layout.list_edit_text_item,
-                R.layout.list_switch,
-                R.layout.list_text_with_img,
-                R.layout.list_button
-        };
-        int getLayoutID() {
-            return ids[this.ordinal()];
-        }
-        static int getLayoutID(int item) {
-            return ids[item];
-        }
-    }
-    private class ListItem {
-        int id = 0;
-        ItemsTypes type;
-        String text;
-        Drawable img;
-        MaskFormatWatcher mfw;
-        boolean is_red;
-        boolean checked;
-        TextWatcher textWatcher;
-        String usertext = ""; // text in edittext, "text" use as hint
-
-        ListItem(ItemsTypes type, String text) {
-            this.type = type;
-            this.text = text;
-        }
-        ListItem setImg(Drawable img) {
-            this.img = img;
-            return this;
-        }
-        ListItem setMFW(MaskFormatWatcher mfw) {
-            this.mfw = mfw;
-            return this;
-        }
-        ListItem setID(int id) {
-            this.id = id;
-            return this;
-        }
-    }
-    class MyAdapter extends BaseAdapter implements View.OnFocusChangeListener {
-        private ArrayList<ListItem> items;
-        MyAdapter() {
-            items = new ArrayList<>();
-        }
-        MyAdapter(ListItem[] items) {
-            this.items = new ArrayList<>(Arrays.asList(items));
-        }
-        public void addItem(ListItem item) {
-            items.add(item);
-        }
-        @Override
-        public int getViewTypeCount() {
-            return ItemsTypes.values().length;
-        }
-
-        @Override
-        public int getItemViewType(int position) {
-            return items.get(position).type.ordinal();
-        }
-
-        @Override
-        public int getCount() {
-            return items.size();
-        }
-
-        @Override
-        public ListItem getItem(int i) {
-            return items.get(i);
-        }
-
-        public ListItem getItemByID(int id) {
-            for (ListItem item : items) {
-                if (item.id == id)
-                    return item;
-            }
-            return null;
-        }
-
-        @Override
-        public long getItemId(int i) {
-            return i;
-        }
-
-        @Override
-        public View getView(int i, View convertView, ViewGroup viewGroup) {
-            // switch by enum
-            int itemType = getItemViewType(i);
-            if (convertView == null) {
-                convertView = getLayoutInflater().inflate(ItemsTypes.getLayoutID(itemType), viewGroup, false);
-            }
-            convertView.setOnFocusChangeListener(this);
-            TextView textView = (TextView) convertView;
-            final ListItem item = items.get(i);
-            final ListItem oldItem = (ListItem)convertView.getTag();
-
-            switch(ItemsTypes.values()[itemType]) {
-                case SWITCH:
-                    ((SwitchCompat) textView).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                        @Override
-                        public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                            item.checked = b;
-                        }
-                    });
-                case BUTTON:
-                case HEADER:
-                case TEXTVIEW_WITH_NARROW: {
-                    textView.setText(item.text);
-                    break;
-                }
-                case TEXTVIEW_WITH_IMG: {
-                    textView.setText(item.text);
-                    textView.setCompoundDrawablesWithIntrinsicBounds(null, null, item.img, null);
-                    break;
-                }
-                case EDITTEXT: {
-                    if (oldItem != null) {
-                        // remove our old listener
-                        textView.removeTextChangedListener(oldItem.textWatcher);
-                        if (oldItem.mfw != null) {// try to remove tinkoff listener
-                            // tinkoff know only about last textView
-                            // and it doesn't remove its listener, when install on new textView
-                            if (oldItem.mfw.isAttachedTo(textView)) {
-                                oldItem.mfw.removeFromTextView();
-                            } else {
-                                textView.removeTextChangedListener(oldItem.mfw);
-                            }
-                        }
-                    }
-                    if (item.textWatcher == null) {
-                        // first query for this item
-                        // create textWatcher
-                        item.textWatcher = new TextWatcher() {
-                            @Override
-                            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                            }
-
-                            @Override
-                            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                                item.usertext = charSequence.toString();
-                            }
-
-                            @Override
-                            public void afterTextChanged(Editable editable) {
-                            }
-                        };
-                    }
-                    if (item.mfw != null) item.mfw.installOn(textView);
-                    textView.setHint(item.text);
-                    textView.setText(item.usertext);
-                    textView.addTextChangedListener(item.textWatcher);
-                    if (item.is_red) textView.getBackground().setColorFilter(Color.RED, PorterDuff.Mode.SRC_ATOP);
-                    break;
-                }
-            }
-            convertView.setTag(item);
-            return convertView;
-        }
-        @Override
-        public void onFocusChange(View view, boolean b) {
-            view.getBackground().clearColorFilter();
-            ((ListItem)view.getTag()).is_red = false;
-        }
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -295,6 +111,7 @@ public class RegActivity extends AppCompatActivity implements ListView.OnItemCli
             Slot[] slotsPassport = new UnderscoreDigitSlotsParser().parseSlots(MASK_PAS_NUM);
 
             adapter = new MyAdapter(
+                    getLayoutInflater(),
                     new ListItem[] {
                             new ListItem(ItemsTypes.HEADER,
                                     resources.getString(R.string.personal_data_section_header)),
