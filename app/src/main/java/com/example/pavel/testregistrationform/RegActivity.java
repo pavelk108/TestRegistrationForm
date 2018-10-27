@@ -512,6 +512,7 @@ public class RegActivity extends AppCompatActivity implements ListView.OnItemCli
                 //request code is item number
                 this.startActivityForResult(intent, i);
             }
+            break;
             case ITEM_ID_SHOW_CONTRACT:
             {
                 Intent intent = new Intent(getApplicationContext(), WebViewActivity.class);
