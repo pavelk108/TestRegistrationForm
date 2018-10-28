@@ -301,7 +301,8 @@ public class RegActivity extends AppCompatActivity implements ListView.OnItemCli
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         // TO DO change to ids
-        switch (adapter.getItem(i).id) {
+        int id = adapter.getItem(i).id;
+        switch (id) {
             case ITEM_ID_DL_PHOTO1:
             case ITEM_ID_DL_PHOTO2:
             case ITEM_ID_PAS_PHOTO1:
@@ -313,7 +314,7 @@ public class RegActivity extends AppCompatActivity implements ListView.OnItemCli
                 try {
                     // create file for save photo
                     // filename defined by button ID
-                    photo = new File(storageDir, getPhotoFileName(i));
+                    photo = new File(storageDir, getPhotoFileName(id));
                     photo.createNewFile();
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -325,8 +326,8 @@ public class RegActivity extends AppCompatActivity implements ListView.OnItemCli
 
                 intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
 
-                //request code is item number
-                this.startActivityForResult(intent, i);
+                //request code is id
+                this.startActivityForResult(intent, id);
             }
             break;
             case ITEM_ID_SHOW_CONTRACT:
@@ -383,7 +384,8 @@ public class RegActivity extends AppCompatActivity implements ListView.OnItemCli
 
         // show small photo
         Drawable drawable = new BitmapDrawable(getResources(), resizedBitmap);
-        ((ListItem)listView.getAdapter().getItem(requestCode)).setImg(drawable);
+        // request code is ID
+        adapter.getItemByID(requestCode).setImg(drawable);
         listView.invalidateViews();
 
     }
@@ -393,11 +395,11 @@ public class RegActivity extends AppCompatActivity implements ListView.OnItemCli
     }
     public static String getPhotoFileName(int resId) {
         switch (resId) {
-            case 9: return PHOTO_SELFIE_FILE_NAME;
-            case 10: return PHOTO_PAS1_FILE_NAME;
-            case 11: return PHOTO_PAS2_FILE_NAME;
-            case 15: return PHOTO_DL1_FILE_NAME;
-            case 16: return PHOTO_DL2_FILE_NAME;
+            case ITEM_ID_PAS_SELFIE: return PHOTO_SELFIE_FILE_NAME;
+            case ITEM_ID_PAS_PHOTO1: return PHOTO_PAS1_FILE_NAME;
+            case ITEM_ID_PAS_PHOTO2: return PHOTO_PAS2_FILE_NAME;
+            case ITEM_ID_DL_PHOTO1: return PHOTO_DL1_FILE_NAME;
+            case ITEM_ID_DL_PHOTO2: return PHOTO_DL2_FILE_NAME;
 
             default: return null;
         }
